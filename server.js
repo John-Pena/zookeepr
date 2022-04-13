@@ -1,9 +1,17 @@
 const express = require('express');
 const PORT = process.env.PORT || 3001;
 const app = express();
+const fs = require('fs');
+const path = require('path');
+
+// parse incomig string or array data
+app.use(express.urlencoded({ extended: true }));
+// parse incoming JSON data
+app.use(express.json());
 
 const { animals } = require('./data/animals');
 
+// allows user to filter serach query of animal traits and diets
 function filterByQuery(query, animalsArray) {
   let personalityTraitsArray = [];
   // We save the animalsArray as filteredResults here:
@@ -42,12 +50,44 @@ function filterByQuery(query, animalsArray) {
   }
   // return the filtered results:
   return filteredResults;
-}
+};
 
 function findById(id, animalsArray) {
   const result = animalsArray.filter(animal => animal.id === id)[0];
   return result;
-}
+};
+
+// allows animal data to be sent to server to store data
+function createNewAnimal(body, animalsArray) {
+  const animal = body;
+  animalsArray.push(animal);
+  // allows new animal data to be written to animals.json
+  fs.writeFileSync(
+    path.join(__dirname, './data/animals.json'),
+    // null prevents editing of original data
+    // 2 creates space to make data more readeable
+    JSON.stringify({ animals: animalsArray }, null, 2)
+  );
+
+  // return finished code to post route for response
+  return animal;
+};
+
+// validates if new animal data key exists, and validates if it's the right type of data
+function validateAnimal(animal) {
+  if (!animal.name || typeof animal.name !== 'string') {
+    return false;
+  }
+  if (!animal.species || typeof animal.species !== 'string') {
+    return false;
+  }
+  if (!animal.diet || typeof animal.diet !== 'string') {
+    return false;
+  }
+  if (!animal.personalityTraits || typeof animal.personalityTraits !== 'string') {
+    return false;
+  }
+};
 
 app.get('/api/animals', (req, res) => {
   let results = animals;
@@ -67,6 +107,24 @@ app.get('/api/animals/:id', (req, res) => {
   }
 });
 
+// allows the server to recieve data
+app.post('/api/animals', (req, res) => {
+  // set id based on what the next index of the array will be
+  req.body.id = animals.length.toString();
+
+  // if any data in req.body is incorrect, send 400 error back
+  if (!validateAnimal(req.body)) {
+    // response method to relay a message to the client making the request
+    res.status(400).send('The animal is not properly formatted.');
+  } else {
+    // add animal to json file and animals array in this function
+    const animal = createNewAnimal(req.body, animals);
+
+    res.json(animal);
+  }
+});
+
+// allows the server to listen for any request
 app.listen(PORT, () => {
   console.log(`API server now on port ${PORT}!`);
 });
