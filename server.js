@@ -133,6 +133,21 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, './public/index.html'));
 });
 
+// creates a route from server.js to animals.html
+app.get('/animals', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/animals.html'));
+});
+
+// creates a route from server.js to zookeepers.html
+app.get('/zookeepers', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/zookeepers.html'));
+});
+
+// wildcard routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/index.html'));
+});
+
 // allows the server to listen for any request
 app.listen(PORT, () => {
   console.log(`API server now on port ${PORT}!`);
