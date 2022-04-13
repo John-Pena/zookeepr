@@ -6,8 +6,12 @@ const path = require('path');
 
 // parse incomig string or array data
 app.use(express.urlencoded({ extended: true }));
+
 // parse incoming JSON data
 app.use(express.json());
+
+// middleware function that instructs server to make certain files readily available
+app.use(express.static('public'));
 
 const { animals } = require('./data/animals');
 
@@ -122,6 +126,11 @@ app.post('/api/animals', (req, res) => {
 
     res.json(animal);
   }
+});
+
+// creates a route from server.js to index.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/index.html'));
 });
 
 // allows the server to listen for any request
