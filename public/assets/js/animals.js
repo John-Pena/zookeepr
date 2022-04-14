@@ -31,6 +31,18 @@ const getAnimals = (formData = {}) => {
 
   console.log(queryUrl);
 
+  // fetches animal array info from server to display on page
+  fetch(queryUrl)
+    .then(response => {
+      if (!response.ok) {
+        return alert('Error' + response.statusText);
+      }
+      return response.json();
+    })
+    .then(animalData => {
+      console.log(animalData);
+      printResults(animalData);
+    })
 };
 
 const handleGetAnimalsSubmit = event => {
